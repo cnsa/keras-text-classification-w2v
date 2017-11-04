@@ -10,7 +10,7 @@ from keras.layers import Dense, Dropout, Activation, LSTM
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_helper import word_to_vec, tokenize_documents
+from data_helper import word_to_vec, tokenize_documents, keras_prepare_text
 from web_data import load_data_and_labels, data_folder_path
 
 # Set Numpy random seed
@@ -30,7 +30,10 @@ word2vec_model_name = 'cnsa.word2vec'
 input_file = os.path.join(data_folder, 'cats.xlsx')
 x, y_train_text, df, selected_categories = load_data_and_labels(input_file)
 document_X = df.Text
-x_test_title = df.Title
+
+# X, Y = keras_prepare_text(df, y_train_text, max_sent_length=num_features, max_sents=document_max_num_words)
+# number_of_documents = len(document_X)
+# num_categories = len(selected_categories)
 
 mlb = MultiLabelBinarizer()
 document_Y = dict(enumerate(mlb.fit_transform(y_train_text)))

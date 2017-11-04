@@ -5,8 +5,6 @@ import re, os, sys
 import pandas as pd
 import numpy as np
 
-import nltk
-
 
 def data_folder_path(data_folder=None):
     if data_folder is None:
@@ -19,7 +17,7 @@ def data_folder_path(data_folder=None):
 
 def clean_str(s):
     """Clean sentence"""
-    s = re.sub(r"[^A-Za-zА-Яа-я0-9(),!?\'\`]", " ", s)
+    s = re.sub(r"[^A-Za-zА-Яа-яёЁ0-9(),!?\'\`]", " ", s)
     s = re.sub(r"\'s", " \'s", s)
     s = re.sub(r"\'ve", " \'ve", s)
     s = re.sub(r"n\'t", " n\'t", s)
@@ -38,8 +36,6 @@ def clean_str(s):
 
 
 def load_data_and_labels(filename):
-    nltk.download('punkt')
-
     """Load sentences and labels"""
     df = pd.read_excel(filename)
     selected = ['Category', 'Text', 'Title']
@@ -53,11 +49,9 @@ def load_data_and_labels(filename):
     labels = sorted(list(set(df[selected[0]].tolist())))
     one_hot = np.zeros((len(labels), len(labels)), int)
     np.fill_diagonal(one_hot, 1)
-    # mask = np.random.randint(0, 3, size=one_hot.shape).astype(np.bool)
-    # one_hot[len(one_hot) - 1] = np.random.randint(0, 2)
-    for idx, item in enumerate(one_hot):
-        if one_hot[idx][len(item) - 1] < 1:
-            one_hot[idx][len(item) - 1] = np.random.randint(0, 2)
+    # for idx, item in enumerate(one_hot):
+    #     if one_hot[idx][len(item) - 1] < 1:
+    #         one_hot[idx][len(item) - 1] = np.random.randint(0, 2)
     label_dict = dict(zip(labels, one_hot))
 
     x_raw = df[selected[1]].apply(lambda x: clean_str(x)).tolist()

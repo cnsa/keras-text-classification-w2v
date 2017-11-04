@@ -6,6 +6,8 @@ from multiprocessing import cpu_count
 import numpy as np
 
 from gensim.models.word2vec import Word2Vec
+from keras.preprocessing.text import Tokenizer, text_to_word_sequence
+from keras.utils import to_categorical
 
 from nltk.downloader import download
 from nltk.corpus import stopwords
@@ -13,6 +15,7 @@ from nltk.tokenize import RegexpTokenizer, sent_tokenize
 from nltk.stem import WordNetLemmatizer
 import pymorphy2 as pm
 from alphabet_detector import AlphabetDetector
+from sklearn.preprocessing import MultiLabelBinarizer
 
 
 def print_labels(pr):
@@ -21,8 +24,6 @@ def print_labels(pr):
 
 def word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories, data_folder, model_name=None,
                 num_features=500, document_max_num_words=100, load=False):
-    download('wordnet')
-
     if model_name is None:
         model_name = 'reuters.word2vec'
 
@@ -59,6 +60,8 @@ def word_to_vec(newsline_documents, number_of_documents, document_Y, selected_ca
 
 def tokenize_prepare():
     download('stopwords')
+    download('wordnet')
+    download('punkt')
 
 
 def tokenize_documents(document_X, document_Y, lang=None, regex=None):
@@ -80,7 +83,7 @@ def tokenize_documents(document_X, document_Y, lang=None, regex=None):
     tokenizer = RegexpTokenizer(regex)
 
     pm_analyzer = pm.MorphAnalyzer()
-    lemmatizer_ru = lambda (w): pm_analyzer.parse(unicode(w))[0].normal_form
+    lemmatizer_ru = lambda (w): pm_analyzer.parse(w)[0].normal_form
 
     wn_analyzer = WordNetLemmatizer()
     lemmatizer_en = lambda (w): wn_analyzer.lemmatize(w)
@@ -93,7 +96,6 @@ def tokenize_documents(document_X, document_Y, lang=None, regex=None):
             return lemmatizer_ru(w)
         else:
             return lemmatizer_en(w)
-
 
     # Tokenized document collection
     newsline_documents = []
@@ -165,3 +167,53 @@ def to_category_vector(categories, target_categories):
             vector[i] = 1.0
 
     return vector
+
+
+MAX_NB_WORDS = 20000
+
+
+def keras_prepare_text(df, y=None, max_sent_length=500, max_sents=100):
+    texts = []
+    labels = []
+    sources = []
+
+    for idx in range(df.Text.shape[0]):
+        text = df.Text[idx]
+        sources.append(text)
+        sentences = sent_tokenize(text)
+        texts.append(sentences)
+
+        labels.append(df.Category[idx])
+
+    tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
+    tokenizer.fit_on_texts(sources)
+
+    data = np.zeros((len(sources), max_sents, max_sent_length), dtype='int32')
+
+    for i, sentences in enumerate(texts):
+        for j, sent in enumerate(sentences):
+            if j < max_sents:
+                wordTokens = text_to_word_sequence(sent)
+                k = 0
+                for _, word in enumerate(wordTokens):
+                    if k < max_sent_length and tokenizer.word_index[word] < MAX_NB_WORDS:
+                        data[i, j, k] = tokenizer.word_index[word]
+                        k = k + 1
+
+    word_index = tokenizer.word_index
+    print('Total %s unique tokens.' % len(word_index))
+
+    encoder = MultiLabelBinarizer()
+    encoded_Y = encoder.fit_transform(y)
+    labels = to_categorical(encoded_Y, num_classes=len(encoded_Y[0]))
+    # labels = to_categorical(np.asarray(labels))
+
+    print('Shape of data tensor:', data.shape)
+    print('Shape of label tensor:', labels.shape)
+
+    indices = np.arange(data.shape[0])
+    np.random.shuffle(indices)
+    data = data[indices]
+    labels = labels[indices]
+
+    return data, labels

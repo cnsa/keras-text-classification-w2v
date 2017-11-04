@@ -1,12 +1,12 @@
 # Text-classification on Keras, Tensorflow with LSTM and word2vector models.
 
-Prepare:
+Prepare python:
 
 ```shell
 pip install -r ./requirements.txt
 ```
 
-Calculate model:
+Train model:
 ```shell
 python ./model.py
 ```

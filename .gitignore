@@ -100,11 +100,10 @@ ENV/
 # mypy
 .mypy_cache/
 
-*.h5
-*.word2vec
-*.word2vec.*
-*.txt
-*.sgm
-*.dtd
-*.tar.gz
-*.pyc
+data/**/*.h5
+data/**/*.word2vec
+data/**/*.word2vec.*
+data/**/*.txt
+data/**/*.sgm
+data/**/*.dtd
+data/**/*.tar.gz

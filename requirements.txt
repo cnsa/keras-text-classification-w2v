@@ -1,0 +1,13 @@
+numpy==1.12
+scipy==0.17.1
+pymorphy2[fast]
+nltk
+gensim
+tensorflow
+h5py
+sklearn-pandas
+pandas
+keras
+future
+beautifulsoup4
+alphabet-detector

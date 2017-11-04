@@ -12,6 +12,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer, sent_tokenize
 from nltk.stem import WordNetLemmatizer
 import pymorphy2 as pm
+from alphabet_detector import AlphabetDetector
 
 
 def print_labels(pr):
@@ -70,19 +71,29 @@ def tokenize_documents(document_X, document_Y, lang=None, regex=None):
         regex = '[\'a-zA-Z]+'
 
     # Load stop-words
-    stop_words = set(stopwords.words(lang))
+    stop_words_en = set(stopwords.words('english'))
+    stop_words_any = set(stopwords.words(lang))
+    stop_words = stop_words_en.union(stop_words_any)
 
     # Initialize tokenizer
     # It's also possible to try with a stemmer or to mix a stemmer and a lemmatizer
     tokenizer = RegexpTokenizer(regex)
 
+    pm_analyzer = pm.MorphAnalyzer()
+    lemmatizer_ru = lambda (w): pm_analyzer.parse(unicode(w))[0].normal_form
+
+    wn_analyzer = WordNetLemmatizer()
+    lemmatizer_en = lambda (w): wn_analyzer.lemmatize(w)
+
+    ad = AlphabetDetector()
+
     # Initialize lemmatizer
-    if lang is 'russian':
-        analyzer = pm.MorphAnalyzer()
-        lemmatizer = lambda (w): analyzer.parse(unicode(w))[0].normal_form
-    else:
-        analyzer = WordNetLemmatizer()
-        lemmatizer = lambda (w): analyzer.lemmatize(w)
+    def lemmatizer(w):
+        if ad.is_cyrillic(w):
+            return lemmatizer_ru(w)
+        else:
+            return lemmatizer_en(w)
+
 
     # Tokenized document collection
     newsline_documents = []

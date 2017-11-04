@@ -1,6 +1,5 @@
 # coding=utf-8
 from numpy import random
-import os
 
 import h5py
 
@@ -8,7 +7,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, LSTM
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MultiLabelBinarizer
 
 from data_helper import word_to_vec, tokenize_documents
 

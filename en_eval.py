@@ -1,7 +1,7 @@
 # coding=utf-8
-from numpy import random, arange, float32
+from numpy import random, arange
 
-import h5py, os
+import h5py
 
 from sklearn.model_selection import train_test_split
 from keras.models import load_model

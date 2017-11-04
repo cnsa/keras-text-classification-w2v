@@ -5,6 +5,7 @@ import h5py, os
 
 from sklearn.model_selection import train_test_split
 from keras.models import load_model
+from keras.callbacks import TensorBoard
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from data_helper import print_predictions, tokenize_documents, word_to_vec, keras_prepare_text

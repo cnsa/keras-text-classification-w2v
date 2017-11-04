@@ -15,3 +15,9 @@ Evaluate saved model:
 ```shell
 python ./eval.py
 ```
+
+Run Tensorboard
+```
+make tensorboard
+```
+http://localhost:6006/#scalars

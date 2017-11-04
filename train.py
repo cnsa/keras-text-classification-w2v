@@ -1,4 +1,5 @@
 # coding=utf-8
+from keras.callbacks import TensorBoard
 from numpy import random
 import os
 
@@ -49,6 +50,9 @@ X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, docu
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
 
+tbCallback = TensorBoard(log_dir='./Graph', histogram_freq=0,
+                         write_graph=True, write_images=True, write_grads=True)
+
 model = Sequential()
 
 model.add(LSTM(int(document_max_num_words * 1.5), input_shape=(document_max_num_words, num_features)))
@@ -59,7 +63,7 @@ model.add(Activation('sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # Train model
-model.fit(X_train, Y_train, batch_size=128, epochs=15, validation_data=(X_test, Y_test))
+model.fit(X_train, Y_train, batch_size=128, epochs=15, validation_data=(X_test, Y_test), callbacks=[tbCallback])
 
 model.save(data_folder + model_name)
 

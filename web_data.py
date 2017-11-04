@@ -60,11 +60,6 @@ def load_data_and_labels(filename):
             one_hot[idx][len(item) - 1] = np.random.randint(0, 2)
     label_dict = dict(zip(labels, one_hot))
 
-    # worker = lambda (xx): np.where(xx > 0)[0]
-    #
-    # for xs in np.nditer(x, op_flags=['readwrite']):
-    #     x[...] = worker(xs)
-
     x_raw = df[selected[1]].apply(lambda x: clean_str(x)).tolist()
     y_raw = df[selected[0]].apply(lambda y: label_dict[y]).tolist()
     y_labels = multi_labels(y_raw, labels)

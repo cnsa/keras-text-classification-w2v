@@ -11,7 +11,7 @@ from keras.layers import Dense, Dropout, Activation, LSTM
 from sklearn.model_selection import train_test_split
 # from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_helper import word_to_vec, tokenize_documents, keras_prepare_text
+from data_helper import word_to_vec, tokenize_documents, keras_prepare_text, doc_to_vec
 from web_data import load_data_and_labels, data_folder_path
 
 # Set Numpy random seed
@@ -42,14 +42,14 @@ newsline_documents, number_of_documents = tokenize_documents(document_X, documen
                                                              # lang='russian', regex=u'[А-Яа-яЁa-zA-Z^,!.\/+-=\']+')
                                                              lang='russian', regex=u'[А-Яа-яЁa-zA-Z\']+')
 
-# x_x, y_y, num_categories_x = doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
-#                                         data_folder, model_name=doc2vec_model_name, num_features=num_features,
-#                                         document_max_num_words=document_max_num_words)
+X, Y, num_categories = doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
+                                  data_folder, model_name=doc2vec_model_name, num_features=num_features,
+                                  document_max_num_words=document_max_num_words)
 
 # Create new Gensim Word2Vec model
-X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
-                                   data_folder, model_name=word2vec_model_name, num_features=num_features,
-                                   document_max_num_words=document_max_num_words, sg=1)
+# X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
+#                                    data_folder, model_name=word2vec_model_name, num_features=num_features,
+#                                    document_max_num_words=document_max_num_words, sg=1)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
 

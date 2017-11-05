@@ -5,7 +5,6 @@ from multiprocessing import cpu_count
 
 import numpy as np
 
-from gensim import utils
 from gensim.models.word2vec import Word2Vec
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from keras.preprocessing.text import Tokenizer, text_to_word_sequence
@@ -24,29 +23,35 @@ def print_labels(pr):
     return " ".join(str(x) for x in pr)
 
 
-# def doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories, data_folder, model_name=None,
-#                num_features=500, document_max_num_words=100, load=False):
-#     if model_name is None:
-#         model_name = 'reuters.doc2vec'
-#
-#     corpus = []
-#     for i, words in enumerate(newsline_documents):
-#         corpus.append(TaggedDocument(words, [i]))
-#
-#     id1 = 1
-#
-#     d2v_model = Doc2Vec(corpus, size=num_features, min_count=5, window=10, workers=cpu_count())
-#     d2v_model.init_sims(replace=True)
-#     d2v_model.save(model_name)
-#
-#     X = []
-#     for text in newsline_documents:
-#         inferred_vec = d2v_model.infer_vector(text)
-#         X.append(inferred_vec)
-#
-#     num_categories = len(selected_categories)
-#
-#     return X_train,
+def doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories, data_folder, model_name=None,
+               num_features=500, document_max_num_words=100, load=False):
+    if model_name is None:
+        model_name = 'reuters.doc2vec'
+
+    if load is True:
+        # Load an existing Word2Vec model
+        d2v_model = Doc2Vec.load(data_folder + model_name)
+    else:
+        corpus = []
+        for i, words in enumerate(newsline_documents):
+            corpus.append(TaggedDocument(words, [i]))
+
+        d2v_model = Doc2Vec(corpus, size=num_features, min_count=5, window=10, workers=cpu_count())
+        d2v_model.init_sims(replace=True)
+        d2v_model.save(data_folder + model_name)
+
+    num_categories = len(selected_categories)
+    X = np.zeros(shape=(number_of_documents, document_max_num_words, num_features)).astype(np.float32)
+    Y = np.zeros(shape=(number_of_documents, num_categories)).astype(np.float32)
+
+    for idx, text in enumerate(newsline_documents):
+        inferred_vec = d2v_model.infer_vector(text)
+        X[idx, :] = inferred_vec
+
+    for idx, key in enumerate(document_Y.keys()):
+        Y[idx, :] = document_Y[key]
+
+    return X, Y, num_categories
 
 
 def word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories, data_folder, model_name=None,

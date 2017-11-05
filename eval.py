@@ -8,7 +8,7 @@ from keras.models import load_model
 from keras.callbacks import TensorBoard
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_helper import print_predictions, tokenize_documents, word_to_vec, keras_prepare_text
+from data_helper import print_predictions, tokenize_documents, word_to_vec, keras_prepare_text, doc_to_vec
 from web_data import load_data_and_labels, data_folder_path
 
 # Set Numpy random seed
@@ -24,6 +24,7 @@ document_max_num_words = 100
 
 model_name = "cnsa.model.h5"
 word2vec_model_name = 'cnsa.word2vec'
+doc2vec_model_name = 'cnsa.doc2vec'
 
 input_file = os.path.join(data_folder, 'cats.xlsx')
 x, document_Y, y_train_text, df, selected_categories = load_data_and_labels(input_file)
@@ -38,10 +39,13 @@ document_X_title = df.Title
 newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y,
                                                              lang='russian', regex=u'[\'А-Яа-яёЁa-zA-Z]+')
 
+X, Y, num_categories = doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
+                                  data_folder, model_name=doc2vec_model_name, num_features=num_features,
+                                  document_max_num_words=document_max_num_words)
 # Create new Gensim Word2Vec model
-X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
-                                   data_folder, model_name=word2vec_model_name, num_features=num_features,
-                                   document_max_num_words=document_max_num_words, sg=1)
+# X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
+#                                    data_folder, model_name=word2vec_model_name, num_features=num_features,
+#                                    document_max_num_words=document_max_num_words, sg=1)
 
 indices = arange(Y.shape[0])
 X_train, X_test, Y_train, Y_test, idx_train, idx_test = train_test_split(X, Y, indices, test_size=0.3)

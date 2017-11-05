@@ -55,9 +55,10 @@ def load_data_and_labels(filename):
     label_dict = dict(zip(labels, one_hot))
 
     x_raw = df[selected[1]].apply(lambda x: clean_str(x)).tolist()
-    y_raw = df[selected[0]].apply(lambda y: label_dict[y]).tolist()
-    y_labels = multi_labels(y_raw, labels)
-    return x_raw, y_labels, df, labels
+    pre_y_raw = df[selected[0]].apply(lambda y: label_dict[y].astype(np.float32)).tolist()
+    y_labels = multi_labels(pre_y_raw, labels)
+    y_raw = dict(enumerate(pre_y_raw))
+    return x_raw, y_raw, y_labels, df, labels
 
 
 def multi_labels(data, all_labels):

@@ -9,7 +9,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, LSTM
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MultiLabelBinarizer
+# from sklearn.preprocessing import MultiLabelBinarizer
 
 from data_helper import word_to_vec, tokenize_documents, keras_prepare_text
 from web_data import load_data_and_labels, data_folder_path
@@ -27,26 +27,29 @@ document_max_num_words = 100
 
 model_name = "cnsa.model.h5"
 word2vec_model_name = 'cnsa.word2vec'
+doc2vec_model_name = 'cnsa.doc2vec'
 
 input_file = os.path.join(data_folder, 'cats.xlsx')
-x, y_train_text, df, selected_categories = load_data_and_labels(input_file)
+x, document_Y, y_train_text, df, selected_categories = load_data_and_labels(input_file)
 document_X = df.Text
 
 # X, Y = keras_prepare_text(df, y_train_text, max_sent_length=num_features, max_sents=document_max_num_words)
 # number_of_documents = len(document_X)
 # num_categories = len(selected_categories)
 
-mlb = MultiLabelBinarizer()
-document_Y = dict(enumerate(mlb.fit_transform(y_train_text)))
-
 # Tokenized document collection
 newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y,
+                                                             # lang='russian', regex=u'[А-Яа-яЁa-zA-Z^,!.\/+-=\']+')
                                                              lang='russian', regex=u'[А-Яа-яЁa-zA-Z\']+')
+
+# x_x, y_y, num_categories_x = doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
+#                                         data_folder, model_name=doc2vec_model_name, num_features=num_features,
+#                                         document_max_num_words=document_max_num_words)
 
 # Create new Gensim Word2Vec model
 X, Y, num_categories = word_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
                                    data_folder, model_name=word2vec_model_name, num_features=num_features,
-                                   document_max_num_words=document_max_num_words)
+                                   document_max_num_words=document_max_num_words, sg=1)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
 

@@ -11,3 +11,4 @@ keras
 future
 beautifulsoup4
 alphabet-detector
+webhoseio

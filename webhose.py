@@ -46,15 +46,27 @@ REQUESTS = dict(enumerate([
 texts = {}
 
 
-def search(request, quiet=False):
-    print(request)
+class SearchIterator:
+    def __init__(self, request):
+        self.request = request
+        self.query = None
 
-    if quiet is False:
-        result = query("filterWebContent", {"ts": TIMESTAMP, "sort": "crawled",
-                                            "q": "language:russian text:" + request + " site_type:news"})
-        print(result["totalResults"])
+        print(request)
 
-        return result
+    def __iter__(self):
+        return self
+
+    def next(self): # Python 3: def __next__(self)
+        if self.query is None:
+            self.query = query("filterWebContent", {"ts": TIMESTAMP, "sort": "crawled",
+                                                    "q": "language:russian text:" + self.request + " site_type:news"})
+            print(self.query["totalResults"])
+            return self.query
+        elif self.query["moreResultsAvailable"] < 1:
+            raise StopIteration
+        else:
+            self.query = get_next()
+            return self.query
 
 
 def save():
@@ -120,11 +132,11 @@ for idx, request in REQUESTS.items():
     print(idx)
 
     for r in requests:
-        output = search(uniq_str(r), quiet=False)
+        for output in SearchIterator(uniq_str(r)):
 
-        if output["totalResults"] > 0:
-            for post in output['posts']:
-                add_text(post['uuid'], post_obj(post, str(idx)))
+            if output["totalResults"] > 0:
+                for post in output['posts']:
+                    add_text(post['uuid'], post_obj(post, str(idx)))
 
 for idx1, idx2 in itertools.combinations(REQUESTS.keys(), 2):
     request_1 = iter_str(REQUESTS[idx1])
@@ -132,10 +144,10 @@ for idx1, idx2 in itertools.combinations(REQUESTS.keys(), 2):
 
     for r in request_1:
         for r2 in request_2:
-            output = search(uniq_str(r + " " + r2), quiet=False)
+            for output in SearchIterator(uniq_str(r + " " + r2)):
 
-            if output["totalResults"] > 0:
-                for post in output['posts']:
-                    add_text(post['uuid'], post_obj(post, str(idx1), str(idx2)))
+                if output["totalResults"] > 0:
+                    for post in output['posts']:
+                        add_text(post['uuid'], post_obj(post, str(idx1), str(idx2)))
 
 save()

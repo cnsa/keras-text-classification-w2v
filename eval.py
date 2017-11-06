@@ -8,8 +8,9 @@ from keras.models import load_model
 from keras.callbacks import TensorBoard
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_helper import print_predictions, tokenize_documents, word_to_vec, keras_prepare_text, doc_to_vec
-from web_data import load_data_and_labels, data_folder_path
+from data_helper import print_predictions, tokenize_documents, word_to_vec, doc_to_vec
+from web_data import data_folder_path
+from webhose_data import load_data_and_labels
 
 # Set Numpy random seed
 random.seed(1000)
@@ -26,7 +27,7 @@ model_name = "cnsa.model.h5"
 word2vec_model_name = 'cnsa.word2vec'
 doc2vec_model_name = 'cnsa.doc2vec'
 
-input_file = os.path.join(data_folder, 'cats.xlsx')
+input_file = os.path.join(data_folder, 'webhose.csv')
 x, document_Y, y_train_text, df, selected_categories = load_data_and_labels(input_file)
 document_X = df.Text
 document_X_title = df.Title
@@ -36,7 +37,7 @@ document_X_title = df.Title
 # num_categories = len(selected_categories)
 
 # Tokenized document collection
-newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y,
+newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y, decode=True,
                                                              lang='russian', regex=u'[\'А-Яа-яёЁa-zA-Z]+')
 
 X, Y, num_categories = doc_to_vec(newsline_documents, number_of_documents, document_Y, selected_categories,
@@ -57,7 +58,7 @@ score, acc = model.evaluate(X_test, Y_test, batch_size=128)
 
 predicted = model.predict_proba(X_test)
 
-print_predictions(predicted, document_X_title, selected_categories, idx_test, y=y_train_text, show_words=100)
+print_predictions(predicted, document_X_title, selected_categories, idx_test, y=y_train_text, show_words=100, encode=False)
 
-print('Score: %1.4f' % score)
+print('Loss: %1.4f' % score)
 print('Accuracy: %1.4f' % acc)

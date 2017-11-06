@@ -35,10 +35,7 @@ def clean_str(s):
     return s.strip().lower()
 
 
-def load_data_and_labels(filename):
-    """Load sentences and labels"""
-    df = pd.read_excel(filename)
-    selected = ['Category', 'Text', 'Title']
+def load_data_and_labels_converter(df, selected):
     non_selected = list(set(df.columns) - set(selected))
 
     df = df.drop(non_selected, axis=1)  # Drop non selected columns
@@ -59,6 +56,13 @@ def load_data_and_labels(filename):
     y_labels = multi_labels(pre_y_raw, labels)
     y_raw = dict(enumerate(pre_y_raw))
     return x_raw, y_raw, y_labels, df, labels
+
+
+def load_data_and_labels(filename):
+    """Load sentences and labels"""
+    df = pd.read_excel(filename)
+    selected = ['Category', 'Text', 'Title']
+    return load_data_and_labels_converter(df, selected)
 
 
 def multi_labels(data, all_labels):

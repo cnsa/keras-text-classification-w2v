@@ -9,10 +9,10 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, LSTM
 
 from sklearn.model_selection import train_test_split
-# from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_helper import word_to_vec, tokenize_documents, keras_prepare_text, doc_to_vec
-from web_data import load_data_and_labels, data_folder_path
+from data_helper import word_to_vec, tokenize_documents, doc_to_vec
+from web_data import data_folder_path
+from webhose_data import load_data_and_labels
 
 # Set Numpy random seed
 random.seed(1000)
@@ -29,7 +29,7 @@ model_name = "cnsa.model.h5"
 word2vec_model_name = 'cnsa.word2vec'
 doc2vec_model_name = 'cnsa.doc2vec'
 
-input_file = os.path.join(data_folder, 'cats.xlsx')
+input_file = os.path.join(data_folder, 'webhose.csv')
 x, document_Y, y_train_text, df, selected_categories = load_data_and_labels(input_file)
 document_X = df.Text
 
@@ -38,7 +38,7 @@ document_X = df.Text
 # num_categories = len(selected_categories)
 
 # Tokenized document collection
-newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y,
+newsline_documents, number_of_documents = tokenize_documents(document_X, document_Y, decode=True,
                                                              # lang='russian', regex=u'[А-Яа-яЁa-zA-Z^,!.\/+-=\']+')
                                                              lang='russian', regex=u'[А-Яа-яЁa-zA-Z\']+')
 
@@ -73,5 +73,5 @@ model.save(data_folder + model_name)
 # Evaluate model
 score, acc = model.evaluate(X_test, Y_test, batch_size=128)
 
-print('Score: %1.4f' % score)
+print('Loss: %1.4f' % score)
 print('Accuracy: %1.4f' % acc)

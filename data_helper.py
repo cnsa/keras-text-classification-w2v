@@ -96,7 +96,7 @@ def tokenize_prepare():
     download('punkt')
 
 
-def tokenize_documents(document_X, document_Y, lang=None, regex=None):
+def tokenize_documents(document_X, document_Y, lang=None, regex=None, decode=False):
     tokenize_prepare()
 
     if lang is None:
@@ -132,10 +132,16 @@ def tokenize_documents(document_X, document_Y, lang=None, regex=None):
     # Tokenized document collection
     newsline_documents = []
 
+    def decode_document(document):
+        if decode is True:
+            return document.decode('utf-8')
+        else:
+            return document
+
     def tokenize(document):
         words = []
 
-        for sentence in sent_tokenize(document):
+        for sentence in sent_tokenize(decode_document(document)):
             tokens = [lemmatizer(t.lower()) for t in tokenizer.tokenize(sentence) if
                       t.lower() not in stop_words]
             words += tokens
@@ -151,7 +157,7 @@ def tokenize_documents(document_X, document_Y, lang=None, regex=None):
     return newsline_documents, number_of_documents
 
 
-def print_predictions(predicted, x, classes, idx, y=None, with_keys=False, show_words=50):
+def print_predictions(predicted, x, classes, idx, y=None, with_keys=False, show_words=50, encode=True):
     with_labels = []
 
     for item in predicted:
@@ -163,20 +169,26 @@ def print_predictions(predicted, x, classes, idx, y=None, with_keys=False, show_
                       )
         with_labels.append(zipped)
 
+    def encoded(value):
+        if encode is True:
+            return value.encode('utf-8')
+        else:
+            return value
+
     if with_keys is True:
-        x_getter = lambda (i): x[i.astype(str)][:show_words].encode('utf-8') if i > 0 else None
+        x_getter = lambda (i): encoded(x[i.astype(str)][:show_words]) if i > 0 else None
     else:
-        x_getter = lambda (i): x[i][:show_words].encode('utf-8') if i > 0 else None
+        x_getter = lambda (i): encoded(x[i][:show_words]) if i > 0 else None
 
     if y is None:
         y_getter = lambda (i): None
     else:
-        y_getter = lambda (i): print_labels(y[i]).encode('utf-8')
+        y_getter = lambda (i): encoded(print_labels(y[i]))
 
     for i, pr in zip(idx, with_labels):
         line = x_getter(i)
         y_line = y_getter(i)
-        labels_string = print_labels(pr).encode('utf-8')
+        labels_string = encoded(print_labels(pr))
         # cats = y_train_text[]
 
         print('{0} => {1} => {2}'.format(line, labels_string, y_line))

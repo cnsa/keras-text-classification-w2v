@@ -1,4 +1,4 @@
-# Text-classification on Keras Tensorflow with LSTM and word2vector models.
+# Text-classification on Keras, Tensorflow with LSTM and doc2vector (or word2vector) models.
 
 Prepare python:
 

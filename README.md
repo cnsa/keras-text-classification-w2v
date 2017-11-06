@@ -24,9 +24,10 @@ http://localhost:6006/#scalars
 
 
 # DATA
-FACTOR ID MAP:
 
-| id  | name |
+### FACTOR ID MAP
+
+| Id  | Factor |
 | --- | ---- |
 | 0 | Рост числа туристов |
 | 1 | Рост времени пребывания туристов |

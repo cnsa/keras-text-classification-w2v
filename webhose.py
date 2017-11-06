@@ -56,7 +56,7 @@ class SearchIterator:
     def __iter__(self):
         return self
 
-    def next(self): # Python 3: def __next__(self)
+    def next(self):  # Python 3: def __next__(self)
         if self.query is None:
             self.query = query("filterWebContent", {"ts": TIMESTAMP, "sort": "crawled",
                                                     "q": "language:russian text:" + self.request + " site_type:news"})

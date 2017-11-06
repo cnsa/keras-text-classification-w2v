@@ -6,6 +6,11 @@ Prepare python:
 pip install -r ./requirements.txt
 ```
 
+Download data:
+```shell
+python ./webhose.py
+```
+
 Train model:
 ```shell
 python ./model.py

@@ -27,8 +27,7 @@ def timestamp():
 
 TIMESTAMP = timestamp()
 
-
-REQUESTS =  dict(enumerate([
+REQUESTS = dict(enumerate([
     u"Рост числа туристов",
     u"Рост времени пребывания туристов",
     u"Увеличение среднего чека",
@@ -52,7 +51,7 @@ def search(request, quiet=False):
 
     if quiet is False:
         result = query("filterWebContent", {"ts": TIMESTAMP, "sort": "crawled",
-                                          "q": "language:russian text:" + request + " site_type:news"})
+                                            "q": "language:russian text:" + request + " site_type:news"})
         print(result["totalResults"])
 
         return result
@@ -63,16 +62,15 @@ def save():
         os.makedirs(FOLDER)
 
     with open(os.path.join(FOLDER, 'webhose.csv'), 'wb') as csvfile:
-        fieldnames = ['Title', 'Text', 'Factor1', 'Factor2']
+        fieldnames = ['Title', 'Text', "UUID", "Date", 'Factor1', 'Factor2']
         writer = csv.DictWriter(csvfile, delimiter=',',
                                 quotechar='"', quoting=csv.QUOTE_NONNUMERIC,
                                 fieldnames=fieldnames)
 
         writer.writeheader()
 
-        for idx, items in texts.items():
-            for text in items:
-                writer.writerow(text)
+        for uuid, text in texts.items():
+            writer.writerow(text)
 
 
 def iter_str(request):
@@ -81,21 +79,41 @@ def iter_str(request):
     else:
         return itertools.chain([request])
 
+
 def uniq_str(string):
     words = string.lower().split()
     return " ".join(sorted(set(words), key=words.index))
 
-def post_obj(post, idx):
-    return { "Text": post['text'].encode("utf-8"), "Title": post['title'].encode("utf-8"), "Factor1": idx, "Factor2": None}
 
-#
-# for request1, request2 in itertools.permutations(REQUESTS.items(), 2):
-#     request_1 = iter_str(request1)
-#     request_2 = iter_str(request2)
-#
-#     for r in request_1:
-#         for r2 in request_2:
-#             search(uniq_str(r + " " + r2), quiet=False)
+def post_obj(post, idx, idx2=""):
+    return {"Text": post['text'].encode("utf-8"),
+            "Title": post['title'].encode("utf-8"),
+            "Date": post['published'],
+            "UUID": post['uuid'],
+            "Factor1": idx,
+            "Factor2": idx2}
+
+
+def factor_to_factor(text, old_text, old_factor2, num="1"):
+    if (text['Factor' + num] not in old_text['Factor1']) and (text['Factor' + num] not in old_factor2):
+        old_factor2.append(text['Factor' + num])
+    return old_factor2
+
+
+def add_text(uuid, text):
+    if texts.has_key(uuid):
+        old_text = texts[uuid]
+        old_factor2 = old_text['Factor2'].split(';')
+        if old_factor2[0] is "":
+            old_factor2 = []
+
+        old_factor2 = factor_to_factor(text, old_text, old_factor2, "1")
+        old_factor2 = factor_to_factor(text, old_text, old_factor2, "2")
+        old_text['Factor2'] = ";".join(old_factor2)
+        texts[uuid] = old_text
+    else:
+        texts[uuid] = text
+
 
 for idx, request in REQUESTS.items():
     requests = iter_str(request)
@@ -105,16 +123,19 @@ for idx, request in REQUESTS.items():
         output = search(uniq_str(r), quiet=False)
 
         if output["totalResults"] > 0:
-            if not texts.has_key(idx):
-                texts[idx] = []
-
-            few_texts = []
-
             for post in output['posts']:
-                few_texts.append(post_obj(post, idx))
+                add_text(post['uuid'], post_obj(post, str(idx)))
 
-            texts[idx] = texts[idx] + few_texts
+for idx1, idx2 in itertools.combinations(REQUESTS.keys(), 2):
+    request_1 = iter_str(REQUESTS[idx1])
+    request_2 = iter_str(REQUESTS[idx2])
 
+    for r in request_1:
+        for r2 in request_2:
+            output = search(uniq_str(r + " " + r2), quiet=False)
 
+            if output["totalResults"] > 0:
+                for post in output['posts']:
+                    add_text(post['uuid'], post_obj(post, str(idx1), str(idx2)))
 
 save()

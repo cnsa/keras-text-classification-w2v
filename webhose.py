@@ -3,6 +3,7 @@ from datetime import datetime
 
 import itertools
 import csv
+import yaml
 
 from webhoseio import query, get_next, config
 from web_data import data_folder_path
@@ -11,6 +12,14 @@ import os
 config(token=os.environ['WEBHOSE'])
 
 FOLDER = data_folder_path('cnsa')
+
+REQUESTS = {}
+
+with open(FOLDER + 'webhose.yaml', 'r') as stream:
+    try:
+        REQUESTS = dict(enumerate(yaml.load(stream)['queries']))
+    except yaml.YAMLError as exc:
+        print(exc)
 
 
 def timestamp():
@@ -26,22 +35,6 @@ def timestamp():
 
 
 TIMESTAMP = timestamp()
-
-REQUESTS = dict(enumerate([
-    u"Рост числа туристов",
-    u"Рост времени пребывания туристов",
-    u"Увеличение среднего чека",
-    u"Повышение прямой доходности от турпотока",
-    u"Увеличение числа коллективных средств размещения",
-    u"Создание специализированных шоппинг-центров",
-    u"Увеличение числа событийных мероприятий",
-    [u"Создание специализированных въездных туроператоров", u"облегченный визовый въезд"],
-    u"Повышение качества экскурсионного обслуживания",
-    u"Повышение качества навигации и транспортного обслуживания",
-    u"Создание туристских кластеров и точек потребления",
-    u"PR продвижение Москвы в СМИ и Соцсетях",
-    u"Реклама туристских возможностей среди выездных туроператоров за рубежом",
-]))
 
 texts = {}
 

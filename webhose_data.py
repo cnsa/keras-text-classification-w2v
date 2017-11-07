@@ -7,8 +7,10 @@ import numpy as np
 from itertools import chain
 import csv
 
+
 def load_data_and_labels(filename):
     """Load sentences and labels"""
+
     def add_tuple(x1, x2):
         if x2 is np.nan:
             return tuple([str(x1)])

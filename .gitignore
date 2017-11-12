@@ -107,6 +107,7 @@ data/**/*.word2vec
 data/**/*.doc2vec
 data/**/*.word2vec.*
 data/**/*.txt
+data/**/*.csv
 data/**/*.sgm
 data/**/*.dtd
 data/**/*.tar.gz

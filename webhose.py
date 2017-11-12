@@ -14,10 +14,13 @@ config(token=os.environ['WEBHOSE'])
 FOLDER = data_folder_path('cnsa')
 
 REQUESTS = {}
+REQUESTS_PREFIX = ""
 
 with open(FOLDER + 'webhose.yaml', 'r') as stream:
     try:
-        REQUESTS = dict(enumerate(yaml.load(stream)['queries']))
+        data = yaml.load(stream)
+        REQUESTS = dict(enumerate(data['queries']))
+        REQUESTS_PREFIX = data['query_prefix']
     except yaml.YAMLError as exc:
         print(exc)
 
@@ -40,25 +43,42 @@ texts = {}
 
 
 class SearchIterator:
-    def __init__(self, request):
-        self.request = request
+    def __init__(self, request, first_only=False, limit=1000):
+        self.request = REQUESTS_PREFIX + " AND " + request
         self.query = None
+        self.first_only = first_only
+        self.limit = limit
+        self.loaded = 0
 
-        print(request)
+        print(self.request)
 
     def __iter__(self):
         return self
 
+    def __is_limit (self):
+        if self.limit is 0:
+            return False
+
+        return self.loaded > self.limit
+
+    def __update_counter(self, total=None):
+        if total is not None and total < 100:
+            self.loaded += total
+        else:
+            self.loaded += 100
+
     def next(self):  # Python 3: def __next__(self)
         if self.query is None:
-            self.query = query("filterWebContent", {"ts": TIMESTAMP, "sort": "crawled",
+            self.query = query("filterWebContent", {"ts": TIMESTAMP, "sort": "relevancy",
                                                     "q": "language:russian text:" + self.request + " site_type:news"})
             print(self.query["totalResults"])
+            self.__update_counter(total=self.query["totalResults"])
             return self.query
-        elif self.query["moreResultsAvailable"] < 1:
+        elif self.first_only or self.__is_limit() or self.query["moreResultsAvailable"] < 1:
             raise StopIteration
         else:
             self.query = get_next()
+            self.__update_counter()
             return self.query
 
 
@@ -125,7 +145,7 @@ for idx, request in REQUESTS.items():
     print(idx)
 
     for r in requests:
-        for output in SearchIterator(uniq_str(r)):
+        for output in SearchIterator(r, first_only=False):
 
             if output["totalResults"] > 0:
                 for post in output['posts']:
@@ -137,7 +157,8 @@ for idx1, idx2 in itertools.combinations(REQUESTS.keys(), 2):
 
     for r in request_1:
         for r2 in request_2:
-            for output in SearchIterator(uniq_str(r + " " + r2)):
+            print(str(idx1) + " " + str(idx2))
+            for output in SearchIterator("(" +r + ") AND (" + r2 + ")", first_only=False):
 
                 if output["totalResults"] > 0:
                     for post in output['posts']:

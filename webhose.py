@@ -44,7 +44,7 @@ texts = {}
 
 class SearchIterator:
     def __init__(self, request, first_only=False, limit=1000):
-        self.request = REQUESTS_PREFIX + " AND " + request
+        self.request = request + " AND " + REQUESTS_PREFIX
         self.query = None
         self.first_only = first_only
         self.limit = limit

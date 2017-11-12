@@ -56,6 +56,8 @@ class SearchIterator:
         return self
 
     def __is_limit (self):
+        if self.first_only is True:
+            return True
         if self.limit is 0:
             return False
 
@@ -74,7 +76,7 @@ class SearchIterator:
             print(self.query["totalResults"])
             self.__update_counter(total=self.query["totalResults"])
             return self.query
-        elif self.first_only or self.__is_limit() or self.query["moreResultsAvailable"] < 1:
+        elif self.__is_limit() or self.query["moreResultsAvailable"] < 1:
             raise StopIteration
         else:
             self.query = get_next()

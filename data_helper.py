@@ -18,6 +18,34 @@ import pymorphy2 as pm
 from alphabet_detector import AlphabetDetector
 from sklearn.preprocessing import MultiLabelBinarizer
 
+RUSSIAN_REGEX = u'[А-Яа-яёЁa-zA-Z^,!.+-\/\']+'
+
+def load(data_folder):
+    X_train = np.load(data_folder + "x_train.npy")
+    X_test = np.load(data_folder + "x_test.npy")
+    Y_train = np.load(data_folder + "y_train.npy")
+    Y_test = np.load(data_folder + "y_test.npy")
+    idx_train = np.load(data_folder + "idx_train.npy")
+    idx_test = np.load(data_folder + "idx_test.npy")
+    document_X_title = np.load(data_folder + "x_title.npy")
+
+    return X_train, X_test, Y_train, Y_test, idx_train, idx_test, document_X_title
+
+def dump(data_folder, X_train=None, X_test=None, Y_train=None, Y_test=None, idx_train=None, idx_test=None, document_X_title=None):
+    if X_train is not None:
+        np.save(data_folder + "x_train.npy", X_train)
+    if X_test is not None:
+        np.save(data_folder + "x_test.npy", X_test)
+    if Y_train is not None:
+        np.save(data_folder + "y_train.npy", Y_train)
+    if Y_test is not None:
+        np.save(data_folder + "y_test.npy", Y_test)
+    if idx_train is not None:
+        np.save(data_folder + "idx_train.npy", idx_train)
+    if idx_test is not None:
+        np.save(data_folder + "idx_test.npy", idx_test)
+    if document_X_title is not None:
+        np.save(data_folder + "x_title.npy", document_X_title)
 
 def print_labels(pr):
     return " ".join(str(x) for x in pr)

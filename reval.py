@@ -3,14 +3,16 @@ from numpy import random, arange, float32, ndenumerate
 
 import h5py, os
 
+import seaborn as sns
+
 import pandas as pd
-from pandas.plotting import scatter_matrix, radviz, andrews_curves, lag_plot, bootstrap_plot
+from pandas.plotting import scatter_matrix
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 from keras.models import load_model
 
-from data_helper import print_predictions, tokenize_documents, doc_to_vec, RUSSIAN_REGEX, load
+from data_helper import print_predictions, load
 from web_data import data_folder_path
 from webhose_data import load_data_and_labels
 
@@ -49,9 +51,6 @@ for (x, y), value in ndenumerate(predicted[:100]):
 scatter_matrix(pd.DataFrame(predicted[:10]), alpha=0.2, figsize=(6, 6))
 scatter_matrix(pd.DataFrame(Y_test[:10]), alpha=0.2, figsize=(6, 6))
 
-# bootstrap_plot(pd.DataFrame(predicted[:100].any()))
-# bootstrap_plot(pd.DataFrame(Y_test[:100].any()))
-
 p1 = pd.DataFrame(predicted[:10]).plot(title=u"Предсказанные результаты")
 p1.set_xlabel('Text')
 p1.set_ylabel('Probability')
@@ -65,6 +64,18 @@ p3.set_ylabel('Probability')
 p4 = pd.DataFrame(Y_test[:10]).plot(title=u"Актуальные результаты", kind="box")
 p4.set_xlabel('Factor')
 p4.set_ylabel('Probability')
+
+df = pd.DataFrame(predicted[:100])
+df['Factor'] = pd.Series(range(predicted.shape[1]))
+sns.set(style="ticks")
+sns.pairplot(df, hue="Factor")
+
+df = pd.DataFrame(Y_test[:100])
+df['Factor'] = pd.Series(range(Y_test.shape[1]))
+sns.set(style="ticks")
+sns.pairplot(df, hue="Factor")
+
+# Show the plot
 
 # print_predictions(predicted, document_X_title, selected_categories, idx_test, y=y_train_text, show_words=100, encode=False)
 

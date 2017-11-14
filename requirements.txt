@@ -8,6 +8,7 @@ h5py
 sklearn-pandas
 pandas==0.21
 pyaml
+seaborn
 keras
 future
 beautifulsoup4
